@@ -148,4 +148,5 @@ impl VolatilityShield {
     }
 }
 
+pub mod strategy;
 mod test;
