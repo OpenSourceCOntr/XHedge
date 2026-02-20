@@ -24,8 +24,27 @@ impl VolatilityShield {
     // Deposit assets
     pub fn deposit(_env: Env, _from: Address, _amount: i128) {
 
-        from.require_auth();
+        // from.require_auth();
         // TODO: Logic
+    }
+
+    /// Convert a number of assets to the equivalent amount of shares.
+    /// Rounds down, favoring the vault.
+    pub fn convert_to_shares(env: Env, amount: i128) -> i128 {
+        let total_shares = Self::total_shares(&env);
+        let total_assets = Self::total_assets(&env);
+
+        if total_shares == 0 || total_assets == 0 {
+            return amount;
+        }
+
+        // Calculation: (amount * total_shares) / total_assets
+        // Rounding down is implicit in integer division.
+        amount
+            .checked_mul(total_shares)
+            .unwrap()
+            .checked_div(total_assets)
+            .unwrap()
     }
 
     /// Convert a number of shares to the equivalent amount of assets.
