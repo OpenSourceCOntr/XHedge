@@ -37,11 +37,6 @@ pub enum DataKey {
 
 // ─────────────────────────────────────────────
 // Strategy cross-contract client
-//
-// Every strategy contract must expose:
-//   deposit(amount: i128)
-//   withdraw(amount: i128)
-//   balance() -> i128
 // ─────────────────────────────────────────────
 pub struct StrategyClient<'a> {
     env:     &'a Env,
@@ -188,8 +183,14 @@ impl VolatilityShield {
         admin.require_auth();
 
         let mut strategies: Vec<Address> = env.storage().instance().get(&DataKey::Strategies).unwrap_or(Vec::new(&env));
-        strategies.push_back(strategy);
+        if strategies.contains(strategy.clone()) {
+            return Err(Error::AlreadyInitialized);
+        }
+        strategies.push_back(strategy.clone());
         env.storage().instance().set(&DataKey::Strategies, &strategies);
+        
+        env.events().publish((symbol_short!("Strategy"), symbol_short!("added")), strategy);
+
         Ok(())
     }
 
@@ -305,4 +306,3 @@ impl VolatilityShield {
 }
 
 mod test;
-pub mod strategy;
